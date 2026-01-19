@@ -210,7 +210,7 @@ impl ResultCode {
 
 #[derive(Clone, Debug)]
 pub struct DnsHeader {
-    pub id: u16, // 16 bits
+    pub id: u16, 
 
     pub recursion_desired: bool,
     pub truncated_message: bool,
@@ -277,7 +277,7 @@ impl DnsHeader {
         self.authoritative_entries = buffer.read_u16()?;
         self.resource_entries = buffer.read_u16()?;
 
-        // Return the constant header size
+        
         Ok(())
     }
 
@@ -642,7 +642,6 @@ impl DnsPacket {
 
         Ok(result)
     }
-
     pub fn write(&mut self, buffer: &mut BytePacketBuffer) -> Result<()> {
         self.header.questions = self.questions.len() as u16;
         self.header.answers = self.answers.len() as u16;
@@ -666,7 +665,6 @@ impl DnsPacket {
 
         Ok(())
     }
-
     pub fn get_random_a(&self) -> Option<Ipv4Addr> {
         self.answers
             .iter()
@@ -676,7 +674,6 @@ impl DnsPacket {
             })
             .next()
     }
-
     fn get_ns<'a>(&'a self, qname: &'a str) -> impl Iterator<Item = (&'a str, &'a str)> {
         self.authorities
             .iter()
@@ -686,7 +683,6 @@ impl DnsPacket {
             })
             .filter(move |(domain, _)| qname.ends_with(*domain))
     }
-
     pub fn get_resolved_ns(&self, qname: &str) -> Option<Ipv4Addr> {
         self.get_ns(qname)
             .flat_map(|(_, host)| {
@@ -700,14 +696,12 @@ impl DnsPacket {
             .map(|addr| *addr)
             .next()
     }
-
     pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
         self.get_ns(qname)
             .map(|(_, host)| host)
             .next()
     }
 }
-
 fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsPacket> {
     let socket = UdpSocket::bind(("0.0.0.0", 43210))?;
 
@@ -729,10 +723,8 @@ fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsP
 
     DnsPacket::from_buffer(&mut res_buffer)
 }
-
 fn recursive_lookup(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
     let mut ns = "198.41.0.4".parse::<Ipv4Addr>().unwrap();
-
     loop {
         println!("attempting lookup of {:?} {} with ns {}", qtype, qname, ns);
 
@@ -772,18 +764,14 @@ fn recursive_lookup(qname: &str, qtype: QueryType) -> Result<DnsPacket> {
 fn handle_query(socket: &UdpSocket) -> Result<()> {
     let mut req_buffer = BytePacketBuffer::new();
     let (_, src) = socket.recv_from(&mut req_buffer.buf)?;
-
     let mut request = DnsPacket::from_buffer(&mut req_buffer)?;
-
     let mut packet = DnsPacket::new();
     packet.header.id = request.header.id;
     packet.header.recursion_desired = true;
     packet.header.recursion_available = true;
     packet.header.response = true;
-
     if let Some(question) = request.questions.pop() {
         println!("Received query: {:?}", question);
-
         if let Ok(result) = recursive_lookup(&question.name, question.qtype) {
             packet.questions.push(question.clone());
             packet.header.rescode = result.header.rescode;
