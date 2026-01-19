@@ -702,10 +702,8 @@ impl DnsPacket {
     }
 
     pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
-        // Get an iterator over the nameservers in the authorities section
         self.get_ns(qname)
             .map(|(_, host)| host)
-            // Finally, pick the first valid entry
             .next()
     }
 }
