@@ -210,7 +210,7 @@ impl ResultCode {
 
 #[derive(Clone, Debug)]
 pub struct DnsHeader {
-    pub id: u16, 
+    pub id: u16,
 
     pub recursion_desired: bool,
     pub truncated_message: bool,
@@ -277,7 +277,6 @@ impl DnsHeader {
         self.authoritative_entries = buffer.read_u16()?;
         self.resource_entries = buffer.read_u16()?;
 
-        
         Ok(())
     }
 
@@ -697,9 +696,7 @@ impl DnsPacket {
             .next()
     }
     pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
-        self.get_ns(qname)
-            .map(|(_, host)| host)
-            .next()
+        self.get_ns(qname).map(|(_, host)| host).next()
     }
 }
 fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> Result<DnsPacket> {
@@ -807,7 +804,7 @@ fn handle_query(socket: &UdpSocket) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let socket = UdpSocket::bind(("0.0.0.0", 2053))?;
+    let socket = UdpSocket::bind(("0.0.0.0", 6969))?;
 
     loop {
         match handle_query(&socket) {
